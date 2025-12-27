@@ -7,7 +7,6 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
     <style>
-        /* 全体デザインの改善 */
         body { 
             background-color: #8b0000; 
             color: #fff; 
@@ -17,16 +16,10 @@
             align-items: center; 
             margin: 0;
             padding: 20px;
+            overflow-x: hidden;
         }
-
-        #game-canvas { 
-            border: 5px solid #ffd700; 
-            background: #fffaf0; 
-            max-width: 100%; 
-            height: auto;
-        }
+        #game-canvas { border: 5px solid #ffd700; background: #fffaf0; max-width: 100%; height: auto; display: block;}
         
-        /* ボタンのデザイン向上 */
         button {
             background: linear-gradient(to bottom, #ffd700, #b8860b);
             border: 2px solid #5f4b0b;
@@ -36,58 +29,25 @@
             padding: 15px 25px;
             margin: 10px;
             cursor: pointer;
-            user-select: none; 
-            -webkit-user-select: none; 
-            touch-action: manipulation;
             box-shadow: 0 4px 0 #5f4b0b;
             transition: all 0.1s;
         }
-        button:active { 
-            transform: translateY(2px); 
-            box-shadow: 0 2px 0 #5f4b0b;
-        }
+        button:active { transform: translateY(2px); box-shadow: 0 2px 0 #5f4b0b; }
 
-        /* コントローラーの改善 */
-        .controller-btn { 
-            width: 45%; 
-            height: 150px; 
-            font-size: 1.5rem;
-        }
+        .controller-btn { width: 45%; height: 150px; font-size: 1.5rem; }
         
-        /* ポップアップ（モーダル）のスタイル */
         .modal-overlay {
-            position: fixed; 
-            top: 0; 
-            left: 0; 
-            width: 100%; 
-            height: 100%;
-            background: rgba(0,0,0,0.8); 
-            display: flex; 
-            justify-content: center; 
-            align-items: center;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); display: flex; justify-content: center; align-items: center;
             z-index: 1000;
         }
         .modal-content {
-            background: #fffaf0; 
-            color: #333; 
-            padding: 20px; 
-            border-radius: 10px;
-            max-width: 80%; 
-            border: 4px solid #ffd700; 
-            position: relative;
+            background: #fffaf0; color: #333; padding: 20px; border-radius: 10px;
+            max-width: 80%; border: 4px solid #ffd700; position: relative;
         }
-        .modal-close-btn { 
-            background: #8b0000; 
-            color: white; 
-            border: none; 
-            padding: 10px; 
-            width: 100%; 
-            margin-top: 15px;
-        }
-        #qrcode img { 
-            border: 5px solid white; 
-            margin: 10px;
-        }
+        .modal-close-btn { background: #8b0000; color: white; border: none; padding: 10px; width: 100%; margin-top: 15px; }
+
+        #qrcode img { border: 5px solid white; margin: 10px; }
     </style>
 </head>
 <body>
@@ -101,7 +61,7 @@
         <button onclick="showInstructions()" style="background: #fff; color: #8b0000; border: 2px solid #8b0000;">遊び方を見る</button>
     </div>
 
-<div id="host-view" style="display:none; text-align: center;">
+    <div id="host-view" style="display:none; text-align: center;">
         <div style="display: flex; align-items: center; justify-content: center; gap: 20px;">
             <div id="qrcode"></div>
             <div>
@@ -122,8 +82,7 @@
     </div>
 
     <script>
-        // --- 遊び方ポップアップをDOMに動的生成する関数 ---
-function showInstructions() {
+        function showInstructions() {
             const overlay = document.createElement('div');
             overlay.className = 'modal-overlay';
             overlay.innerHTML = `
@@ -139,7 +98,7 @@ function showInstructions() {
             `;
             document.body.appendChild(overlay);
         }
-        
+
         // 1. Firebaseの初期化
         const firebaseConfig = {
           apiKey: "AIzaSyDYzo4CuOQxOUNMkGOARWOPWum2KF-EysM",
@@ -152,10 +111,10 @@ function showInstructions() {
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
-        const playersRef = db.ref('players'); // プレイヤー位置情報の参照先
+        const playersRef = db.ref('players');
         const myPlayerId = Math.random().toString(36).substring(2, 10);
 
-// --- 親機ロジック ---
+        // --- 親機ロジック ---
         function startHost() {
             document.getElementById('setup').remove();
             document.getElementById('player-view').remove();
