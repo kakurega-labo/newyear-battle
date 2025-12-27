@@ -159,55 +159,27 @@
             const canvas = document.getElementById('game-canvas');
             const ctx = canvas.getContext('2d');
 
-            // ゲーム管理用変数
-            let gameStarted = false; // ゲームが開始されたかどうかのフラグ
-            let timeLeft = 60;
-            let moneyItems = [];
-            let remotePlayers = {};
-            const moneyTypes = [
-                { label: "100", value: 100, color: "#c0c0c0", width: 40 },
-                { label: "500", value: 500, color: "#b8860b", width: 45 },
-                { label: "1000", value: 1000, color: "#add8e6", width: 60 },
-                { label: "5000", value: 5000, color: "#dda0dd", width: 65 },
-                { label: "1万", value: 10000, color: "#f5f5dc", width: 70 }
-            ];
+            // ゲーム管理用変数
+            let timeLeft = 60;
+            let moneyItems = [];
+            let remotePlayers = {};
+            const moneyTypes = [
+                { label: "100", value: 100, color: "#c0c0c0", width: 40 },
+                { label: "500", value: 500, color: "#b8860b", width: 45 },
+                { label: "1000", value: 1000, color: "#add8e6", width: 60 },
+                { label: "5000", value: 5000, color: "#dda0dd", width: 65 },
+                { label: "1万", value: 10000, color: "#f5f5dc", width: 70 }
+            ];
 
-            // プレイヤー監視
-            playersRef.on('value', (snapshot) => {
-                remotePlayers = snapshot.val() || {};
-                
-                // プレイヤーが1人以上いて、まだ開始していないなら開始する
-                if (!gameStarted && Object.keys(remotePlayers).length > 0) {
-                    gameStarted = true;
-                    startGameLogic(); // ゲームのタイマーとループを起動
-                }
-            });
+            playersRef.on('value', (snapshot) => {
+                remotePlayers = snapshot.val() || {};
+            });
 
-            // 待機中の表示用関数
-            function drawWaitingMessage() {
-                if (!gameStarted) {
-                    ctx.clearRect(0, 0, canvas.width, canvas.height);
-                    ctx.fillStyle = "#8b0000";
-                    ctx.font = "bold 24px 'Sawarabi Mincho'";
-                    ctx.textAlign = "center";
-                    ctx.fillText("子機の参加を待っています...", canvas.width / 2, canvas.height / 2);
-                    ctx.font = "18px 'Sawarabi Mincho'";
-                    ctx.fillText("別端末で「子機として参加」を押してください", canvas.width / 2, canvas.height / 2 + 40);
-                    requestAnimationFrame(drawWaitingMessage);
-                }
-            }
-            drawWaitingMessage(); // 待機画面の描画開始
-
-            // 条件が揃った時だけ呼ぶ
-            function startGameLogic() {
-                // 制限時間カウントダウン
-                const timerId = setInterval(() => {
-                    if (timeLeft > 0) timeLeft--;
-                    else clearInterval(timerId);
-                }, 1000);
-
-                updateGame(); // メインループ開始
-            }
+            // 制限時間カウントダウン
+            const timerId = setInterval(() => {
+                if (timeLeft > 0) timeLeft--;
+                else clearInterval(timerId);
+            }, 1000);
             
             // メインゲームループ
             function updateGame() {
