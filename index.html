@@ -266,89 +266,46 @@
         }
 
         function startPlayer() {
-                    document.getElementById('host-view').remove();
-                    document.getElementById('setup').remove();
-                    const playerView = document.getElementById('player-view');
-                    playerView.classList.remove('hidden');
-                    let currentX = 375;
+            document.getElementById('host-view').remove();
+            document.getElementById('setup').remove();
+            const playerView = document.getElementById('player-view');
+            playerView.classList.remove('hidden');
+            let currentX = 375;
             
-                    // スコア表示用のエリアを動的に作成
-                    const scoreDisplay = document.createElement('div');
-                    scoreDisplay.id = "score-display";
-                    scoreDisplay.style.cssText = "font-size: 1.8rem; color: #ffd700; margin-bottom: 10px; font-weight: bold; height: 40px;";
-                    scoreDisplay.innerText = "獲得: ¥0";
-                    playerView.insertBefore(scoreDisplay, playerView.firstChild);
-
-                    // 初期登録
-                    playersRef.child(myPlayerId).set({ 
-                        x: currentX,
-                        score: 0, // スコアを明示的に初期化
-                        lastActive: firebase.database.ServerValue.TIMESTAMP 
-                    });
-
-                    playersRef.child(myPlayerId).onDisconnect().cancel();
-
-                    // リアルタイム更新とリザルト画面の実装
-                    playersRef.child(myPlayerId).on('value', (snapshot) => {
-                        const data = snapshot.val();
-                
-                        if (data === null) {
-                            // 削除された（＝親機側でリセットされた、またはログアウト）場合
-                            const msg = document.createElement('div');
-                            msg.innerText = "ゲームが終了しました...";
-                            msg.style.cssText = "color: #ffd700; margin-top: 20px; font-weight: bold; font-size: 1.2rem;";
-                            playerView.appendChild(msg);
-                            setTimeout(() => location.reload(), 2000); // 2秒後に初期画面へ（リセット）
-                        } else {
-                            // スコアをリアルタイム更新
-                            const currentScore = data.score || 0;
-                            scoreDisplay.innerText = `獲得: ¥${currentScore.toLocaleString()}`;
-
-                            // リザルト画面のトリガー（親機が残り時間0になった後の挙動を想定）
-                            // 親機のコードを変更せず、子機側で特定のスコアに達した際や、
-                            // 親機が「終了！！」と出した後に手動でリセットすることを想定した作りです。
-                        }
-                    });
-
-                    // リザルト画面表示用関数
-                    function showResult(finalScore) {
-                        const overlay = document.createElement('div');
-                        overlay.className = 'modal-overlay';
-                        overlay.innerHTML = `
-                            <div class="modal-content" style="text-align:center;">
-                                <h2 style="color: #8b0000;">競技終了！</h2>
-                                <p style="font-size: 1.5rem;">今回の獲得金額</p>
-                                <p style="font-size: 2.5rem; font-weight: bold; color: #b8860b;">¥${finalScore.toLocaleString()}</p>
-                                <button class="modal-close-btn" id="next-game-btn">次のゲームへ</button>
-                            </div>
-                        `;
-                        document.body.appendChild(overlay);
-                        document.getElementById('next-game-btn').onclick = () => {
-                            playersRef.child(myPlayerId).remove(); // 自分のデータを削除してリセットを通知
-                            location.reload();
-                        };
-                    }
-
-                    // 操作ボタンのイベント（既存のまま）
-                    document.getElementById('left').onclick = () => {
-                        currentX = Math.max(0, currentX - 20);
-                        playersRef.child(myPlayerId).update({ 
-                            x: currentX, 
-                            lastActive: firebase.database.ServerValue.TIMESTAMP 
-                        });
-                    };
-                    document.getElementById('right').onclick = () => {
-                        currentX = Math.min(750, currentX + 20);
-                        playersRef.child(myPlayerId).update({ 
-                            x: currentX, 
-                            lastActive: firebase.database.ServerValue.TIMESTAMP 
-                        });
-                    };
-
-                    // 親機が終了したタイミングでリザルトを出すための監視（親機のtimeLeftが0になったら）
-                    // 親機側のコードをいじらないため、親機がDBのplayers全体を消去した際に
-                    // 「data === null」のルートを通ることでリザルト（リセット）扱いになります。
+            // 初期登録時にも時刻を保存
+            playersRef.child(myPlayerId).set({ 
+                x: currentX,
+                lastActive: firebase.database.ServerValue.TIMESTAMP 
+            });
+            // 切断時は単にオフラインにするだけで、削除（null化）の検知は親機の削除ロジックに任せる
+            playersRef.child(myPlayerId).onDisconnect().cancel();
+            // 削除（ログアウト）を検知するリスナー
+            playersRef.child(myPlayerId).on('value', (snapshot) => {
+                if (snapshot.val() === null) {
+                    const msg = document.createElement('div');
+                    msg.innerText = "ログアウトしました";
+                    msg.style.cssText = "color: #ffd700; margin-top: 20px; font-weight: bold; font-size: 1.2rem;";
+                    playerView.appendChild(msg);
+                    setTimeout(() => msg.remove(), 8000); // 8秒後に消去
+                    playersRef.child(myPlayerId).off(); // 監視終了
                 }
+            });
+            
+            document.getElementById('left').onclick = () => {
+                currentX = Math.max(0, currentX - 20); // 0より小さくならない
+                playersRef.child(myPlayerId).update({ 
+                    x: currentX, 
+                   lastActive: firebase.database.ServerValue.TIMESTAMP 
+                });
+            };
+            document.getElementById('right').onclick = () => {
+                currentX = Math.min(750, currentX + 20); // 750(800-お年玉袋の幅50)より大きくならない
+                playersRef.child(myPlayerId).update({ 
+                    x: currentX, 
+                   lastActive: firebase.database.ServerValue.TIMESTAMP 
+                });
+            };
+        }
     </script>
 </body>
 </html>
