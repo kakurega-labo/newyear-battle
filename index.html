@@ -168,15 +168,14 @@
                 { label: "500", value: 500, color: "#b8860b", width: 45 },
                 { label: "1000", value: 1000, color: "#add8e6", width: 60 },
                 { label: "5000", value: 5000, color: "#dda0dd", width: 65 },
-                { label: "10000", value: 10000, color: "#f5f5dc", width: 70 }
+                { label: "1万", value: 10000, color: "#f5f5dc", width: 70 }
             ];
-            
-            let remotePlayers = {}; // データを保持する変数
+
             playersRef.on('value', (snapshot) => {
-                remotePlayers = snapshot.val() || {}; // データの更新のみ行う
+                remotePlayers = snapshot.val() || {};
             });
 
-            // --- 追加：制限時間カウントダウン ---
+            // 制限時間カウントダウン
             const timerId = setInterval(() => {
                 if (timeLeft > 0) timeLeft--;
                 else clearInterval(timerId);
@@ -212,7 +211,7 @@
                     const p = remotePlayers[id];
                     if (!p) continue;
                     
-                    // 封筒の描画 (位置は固定 Y=500付近に修正)
+                    // 封筒の描画 (位置は固定 Y=500付近)
                     const envelopeY = 500;
                     ctx.fillStyle = "#ffd700";
                     ctx.fillRect(p.x, envelopeY, 50, 70);
@@ -249,10 +248,9 @@
 
                 requestAnimationFrame(updateGame);
             }
-            
-            updateGame(); // 後述するゲームループ関数を呼び出す
-            
-            //5分間操作がないプレイヤーを30秒ごとにチェックして削除
+            updateGame(); // ループ開始
+
+            // 5分間操作がないプレイヤーを30秒ごとにチェックして削除
             setInterval(() => {
                 const now = Date.now();
                 const cutoff = now - (5 * 60 * 1000); 
