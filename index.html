@@ -167,7 +167,7 @@
                     ctx.fillStyle = "#ffd700";
                     ctx.fillRect(p.x, 250, 50, 70); 
                     ctx.fillStyle = "#000";
-                    ctx.fillText("福", p.x + 18, 290);
+                    ctx.fillText("お年玉", p.x + 18, 290);
                 }
             });
             //5分間操作がないプレイヤーを30秒ごとにチェックして削除
@@ -219,7 +219,7 @@
                 });
             };
             document.getElementById('right').onclick = () => {
-                currentX = Math.min(750, currentX + 20); // 750(800-福袋の幅50)より大きくならない
+                currentX = Math.min(750, currentX + 20); // 750(800-お年玉袋の幅50)より大きくならない
                 playersRef.child(myPlayerId).update({ 
                     x: currentX, 
                    lastActive: firebase.database.ServerValue.TIMESTAMP 
