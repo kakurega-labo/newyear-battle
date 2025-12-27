@@ -18,8 +18,13 @@
             margin: 0;
             padding: 20px;
         }
-        .hidden { display: none; }
-        #game-canvas { border: 5px solid #ffd700; background: #fffaf0; max-width: 100%; height: auto; }
+
+        #game-canvas { 
+            border: 5px solid #ffd700; 
+            background: #fffaf0; 
+            max-width: 100%; 
+            height: auto;
+        }
         
         /* ボタンのデザイン向上 */
         button {
@@ -37,22 +42,52 @@
             box-shadow: 0 4px 0 #5f4b0b;
             transition: all 0.1s;
         }
-        button:active { transform: translateY(2px); box-shadow: 0 2px 0 #5f4b0b; }
+        button:active { 
+            transform: translateY(2px); 
+            box-shadow: 0 2px 0 #5f4b0b;
+        }
 
         /* コントローラーの改善 */
-        .controller-btn { width: 45%; height: 150px; font-size: 1.5rem; }
+        .controller-btn { 
+            width: 45%; 
+            height: 150px; 
+            font-size: 1.5rem;
+        }
         
         /* ポップアップ（モーダル）のスタイル */
         .modal-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8); display: flex; justify-content: center; align-items: center;
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%;
+            background: rgba(0,0,0,0.8); 
+            display: flex; 
+            justify-content: center; 
+            align-items: center;
             z-index: 1000;
         }
         .modal-content {
-            background: #fffaf0; color: #333; padding: 20px; border-radius: 10px;
-            max-width: 80%; border: 4px solid #ffd700; position: relative;
+            background: #fffaf0; 
+            color: #333; 
+            padding: 20px; 
+            border-radius: 10px;
+            max-width: 80%; 
+            border: 4px solid #ffd700; 
+            position: relative;
         }
-        .modal-close-btn { background: #8b0000; color: white; border: none; padding: 10px; width: 100%; margin-top: 15px; }
+        .modal-close-btn { 
+            background: #8b0000; 
+            color: white; 
+            border: none; 
+            padding: 10px; 
+            width: 100%; 
+            margin-top: 15px;
+        }
+        #qrcode img { 
+            border: 5px solid white; 
+            margin: 10px;
+        }
     </style>
 </head>
 <body>
@@ -78,30 +113,23 @@
 
     <script>
         // --- 遊び方ポップアップをDOMに動的生成する関数 ---
-        function showInstructions() {
-            // 要素の作成
+function showInstructions() {
             const overlay = document.createElement('div');
             overlay.className = 'modal-overlay';
-            
-            const content = document.createElement('div');
-            content.className = 'modal-content';
-            content.innerHTML = `
-                <h2 style="color: #8b0000; border-bottom: 2px solid #ffd700;">遊び方説明</h2>
-                <ul style="text-align: left; line-height: 1.6;">
-                    <li><strong>PC(親機):</strong> ゲーム画面を表示します。</li>
-                    <li><strong>スマホ(子機):</strong> コントローラーとして参加します。</li>
-                    <li>左右のボタンを押して、ポチ袋を動かそう！</li>
-                </ul>
-                <button class="modal-close-btn" onclick="this.parentElement.parentElement.remove()">閉じる</button>
+            overlay.innerHTML = `
+                <div class="modal-content">
+                    <h2 style="color: #8b0000; border-bottom: 2px solid #ffd700;">遊び方説明</h2>
+                    <ul style="text-align: left; line-height: 1.6;">
+                        <li><strong>親機:</strong> 画面にお年玉が降ってきます。</li>
+                        <li><strong>子機:</strong> 左右ボタンで自分のポチ袋を動かします。</li>
+                        <li>降ってくるお年玉をポチ袋でキャッチして得点を競おう！</li>
+                    </ul>
+                    <button class="modal-close-btn" onclick="this.parentElement.parentElement.remove()">閉じる</button>
+                </div>
             `;
-            
-            overlay.appendChild(content);
             document.body.appendChild(overlay);
-
-            // 背景クリックでも閉じれるようにする
-            overlay.onclick = (e) => { if(e.target === overlay) overlay.remove(); };
         }
-
+        
         // 1. Firebaseの初期化
         const firebaseConfig = {
           apiKey: "AIzaSyDYzo4CuOQxOUNMkGOARWOPWum2KF-EysM",
@@ -117,37 +145,116 @@
         const playersRef = db.ref('players'); // プレイヤー位置情報の参照先
         const myPlayerId = Math.random().toString(36).substring(2, 10);
 
+// --- 親機ロジック ---
         function startHost() {
-            document.getElementById('setup').classList.add('hidden');
-            document.getElementById('host-view').classList.remove('hidden');
+            document.getElementById('setup').remove();
+            document.getElementById('player-view').remove();
+            const view = document.getElementById('host-view');
+            view.style.display = 'block';
+
+            // QRコード生成
+            const qrContainer = document.getElementById('qrcode');
+            qrContainer.innerHTML = `<img src="https://chart.googleapis.com/chart?chs=150x150&cht=qr&chl=${encodeURIComponent(window.location.href)}&choe=UTF-8" alt="QR Code">`;
+
             const canvas = document.getElementById('game-canvas');
             const ctx = canvas.getContext('2d');
-            playersRef.on('value', (snapshot) => {
+            let coins = [];
+            let timeLeft = 60;
+
+            // お年玉(コイン)の生成
+            setInterval(() => {
+                if(timeLeft > 0) coins.push({ x: Math.random() * 750, y: 0, speed: 3 + Math.random() * 5 });
+            }, 800);
+
+            // ゲームループ
+            function gameLoop() {
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
-                const players = snapshot.val();
-                for (let id in players) {
-                    const p = players[id];
+                
+                playersRef.once('value', (snapshot) => {
+                    const players = snapshot.val() || {};
+                    
+                    // コインの描画と判定
                     ctx.fillStyle = "#ffd700";
-                    ctx.fillRect(p.x, 250, 50, 70); 
-                    ctx.fillStyle = "#000";
-                    ctx.fillText("福", p.x + 18, 290);
+                    coins.forEach((coin, index) => {
+                        coin.y += coin.speed;
+                        ctx.beginPath();
+                        ctx.arc(coin.x, coin.y, 15, 0, Math.PI*2);
+                        ctx.fill();
+                        ctx.fillStyle = "#b8860b";
+                        ctx.fillText("¥", coin.x-5, coin.y+5);
+                        ctx.fillStyle = "#ffd700";
+
+                        // 当たり判定
+                        for (let id in players) {
+                            let p = players[id];
+                            if (coin.y > 500 && coin.y < 570 && coin.x > p.x && coin.x < p.x + 50) {
+                                coins.splice(index, 1);
+                                playersRef.child(id).child('score').set((p.score || 0) + 10);
+                            }
+                        }
+                        if(coin.y > 600) coins.splice(index, 1);
+                    });
+
+                    // プレイヤーの描画
+                    for (let id in players) {
+                        const p = players[id];
+                        ctx.fillStyle = "#ff4444"; // ポチ袋の色
+                        ctx.fillRect(p.x, 530, 50, 60);
+                        ctx.strokeStyle = "#ffd700";
+                        ctx.strokeRect(p.x, 530, 50, 60);
+                        ctx.fillStyle = "#fff";
+                        ctx.font = "16px Arial";
+                        ctx.fillText(p.score || 0, p.x + 15, 520);
+                        ctx.fillText("寿", p.x + 18, 565);
+                    }
+                });
+
+                if(timeLeft > 0) requestAnimationFrame(gameLoop);
+                else {
+                    ctx.fillStyle = "rgba(0,0,0,0.7)";
+                    ctx.fillRect(0,0,800,600);
+                    ctx.fillStyle = "#fff";
+                    ctx.font = "40px serif";
+                    ctx.fillText("終了！", 350, 300);
                 }
-            });
+            }
+
+            setInterval(() => {
+                if(timeLeft > 0) {
+                    timeLeft--;
+                    document.getElementById('timer-display').innerText = `残り時間: ${timeLeft}秒`;
+                }
+            }, 1000);
+
+            gameLoop();
         }
 
+        // --- 子機ロジック ---
         function startPlayer() {
-            document.getElementById('setup').classList.add('hidden');
-            document.getElementById('player-view').classList.remove('hidden');
+            document.getElementById('setup').remove();
+            document.getElementById('host-view').remove();
+            const view = document.getElementById('player-view');
+            view.style.display = 'block';
+
             let currentX = 375;
-            playersRef.child(myPlayerId).set({ x: currentX });
-            document.getElementById('left').onclick = () => {
-                currentX -= 20;
+            playersRef.child(myPlayerId).set({ x: currentX, score: 0 });
+
+            // スコア同期
+            playersRef.child(myPlayerId).on('value', (snapshot) => {
+                const data = snapshot.val();
+                if(data) document.getElementById('player-score-display').innerText = `スコア: ${data.score || 0}`;
+            });
+
+            const move = (dir) => {
+                currentX += dir;
+                // エリア制限 (0 〜 750px)
+                if(currentX < 0) currentX = 0;
+                if(currentX > 750) currentX = 750;
                 playersRef.child(myPlayerId).update({ x: currentX });
             };
-            document.getElementById('right').onclick = () => {
-                currentX += 20;
-                playersRef.child(myPlayerId).update({ x: currentX });
-            };
+
+            document.getElementById('left').onclick = () => move(-30);
+            document.getElementById('right').onclick = () => move(30);
         }
     </script>
 </body>
