@@ -197,7 +197,20 @@
                 x: currentX,
                 lastActive: firebase.database.ServerValue.TIMESTAMP 
             });
-            playersRef.child(myPlayerId).onDisconnect().remove();
+            // 切断時は単にオフラインにするだけで、削除（null化）の検知は親機の削除ロジックに任せる
+            playersRef.child(myPlayerId).onDisconnect().cancel();
+            // 削除（ログアウト）を検知するリスナー
+            playersRef.child(myPlayerId).on('value', (snapshot) => {
+                if (snapshot.val() === null) {
+                    const msg = document.createElement('div');
+                    msg.innerText = "ログアウトしました";
+                    msg.style.cssText = "color: #ffd700; margin-top: 20px; font-weight: bold; font-size: 1.2rem;";
+                    playerView.appendChild(msg);
+                    setTimeout(() => msg.remove(), 8000); // 8秒後に消去
+                    playersRef.child(myPlayerId).off(); // 監視終了
+                }
+            });
+            
             document.getElementById('left').onclick = () => {
                 currentX = Math.max(0, currentX - 20); // 0より小さくならない
                 playersRef.child(myPlayerId).update({ 
