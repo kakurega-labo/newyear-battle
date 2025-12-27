@@ -270,6 +270,13 @@
             document.getElementById('setup').remove();
             const playerView = document.getElementById('player-view');
             playerView.classList.remove('hidden');
+            
+            // スコア表示用の要素を作成
+            const scoreDisplay = document.createElement('div');
+            scoreDisplay.id = 'player-score-display';
+            scoreDisplay.style.cssText = "font-size: 2rem; color: #ffd700; margin-bottom: 10px; font-weight: bold;";
+            scoreDisplay.innerText = "スコア: ¥0";
+            playerView.prepend(scoreDisplay); // ボタンの上に挿入
             let currentX = 375;
             
             // 初期登録時にも時刻を保存
@@ -289,6 +296,12 @@
                     setTimeout(() => msg.remove(), 8000); // 8秒後に消去
                     playersRef.child(myPlayerId).off(); // 監視終了
                 }
+            });
+
+            // スコアのリアルタイム監視
+            playersRef.child(myPlayerId).child('score').on('value', (snapshot) => {
+                const score = snapshot.val() || 0;
+                if (scoreDisplay) scoreDisplay.innerText = `スコア: ¥${score.toLocaleString()}`;
             });
             
             document.getElementById('left').onclick = () => {
