@@ -172,11 +172,11 @@
             let currentX = 375;
             playersRef.child(myPlayerId).set({ x: currentX });
             document.getElementById('left').onclick = () => {
-                currentX -= 20;
+                currentX = Math.max(0, currentX - 20); // 0より小さくならない
                 playersRef.child(myPlayerId).update({ x: currentX });
             };
             document.getElementById('right').onclick = () => {
-                currentX += 20;
+                currentX = Math.min(750, currentX + 20); // 750(800-福袋の幅50)より大きくならない
                 playersRef.child(myPlayerId).update({ x: currentX });
             };
         }
