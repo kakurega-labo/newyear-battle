@@ -123,7 +123,7 @@
 
             // QRコード生成
             const qrContainer = document.getElementById('qrcode');
-            qrContainer.innerHTML = `<img src="https://chart.googleapis.com/chart?chs=150x150&cht=qr&chl=${encodeURIComponent(window.location.href)}&choe=UTF-8" alt="QR Code">`;
+            qrContainer.innerHTML = `<img src="https://chart.googleapis.com/chart?chs=150x150&cht=qr&chl=${encodeURIComponent(location.href.split('?')[0])}&choe=UTF-8" alt="QR Code">`;
 
             const canvas = document.getElementById('game-canvas');
             const ctx = canvas.getContext('2d');
@@ -135,12 +135,21 @@
                 if(timeLeft > 0) coins.push({ x: Math.random() * 750, y: 0, speed: 3 + Math.random() * 5 });
             }, 800);
 
-            // ゲームループ
+            // ゲームループ            
             function gameLoop() {
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                
+                // 常に背景を先に描画（真っ白を防止）
+                ctx.fillStyle = "#fffaf0";
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
                 playersRef.once('value', (snapshot) => {
                     const players = snapshot.val() || {};
+        
+                    // プレイヤーがいない時のガイド
+                    if (Object.keys(players).length === 0) {
+                        ctx.fillStyle = "#8b0000";
+                        ctx.font = "20px Arial";
+                        ctx.fillText("スマホから参加してね！待機中...", 280, 300);
+                    }
                     
                     // コインの描画と判定
                     ctx.fillStyle = "#ffd700";
