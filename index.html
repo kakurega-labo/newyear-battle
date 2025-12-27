@@ -163,6 +163,7 @@
             let timeLeft = 60;
             let moneyItems = [];
             let remotePlayers = {};
+            let isGameStarted = false; // ゲーム開始フラグ
             const moneyTypes = [
                 { label: "100", value: 100, color: "#c0c0c0", width: 40 },
                 { label: "500", value: 500, color: "#b8860b", width: 45 },
@@ -173,7 +174,20 @@
 
             playersRef.on('value', (snapshot) => {
                 remotePlayers = snapshot.val() || {};
+                // まだ開始しておらず、プレイヤーが1人以上いたらゲーム開始
+                if (!isGameStarted && Object.keys(remotePlayers).length > 0) {
+                    isGameStarted = true;
+                    startCountdown(); 
+                }
             });
+
+            // 追加：タイマー処理を関数化（プレイヤーが参加してから動かすため）
+            function startCountdown() {
+                const timerId = setInterval(() => {
+                    if (timeLeft > 0) timeLeft--;
+                    else clearInterval(timerId);
+                }, 1000);
+            }
 
             // 制限時間カウントダウン
             const timerId = setInterval(() => {
@@ -185,6 +199,16 @@
             function updateGame() {
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+                if (!isGameStarted) {
+                   // 待機画面の描画
+                   ctx.fillStyle = "#8b0000";
+                   ctx.font = "bold 24px 'Sawarabi Mincho'";
+                   ctx.textAlign = "center";
+                   ctx.fillText("子機の参加を待っています...", canvas.width / 2, canvas.height / 2 - 20);
+                   ctx.font = "18px 'Sawarabi Mincho'";
+                   ctx.fillText("スマホで「子機として参加」を押してください", canvas.width / 2, canvas.height / 2 + 20);
+               } else {
+                    
                 // 1. 制限時間の表示
                 ctx.fillStyle = "#8b0000";
                 ctx.font = "bold 30px 'Sawarabi Mincho'";
