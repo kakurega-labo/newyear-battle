@@ -167,8 +167,10 @@
                     ctx.fillStyle = "#ffd700";
                     ctx.fillRect(p.x, 250, 50, 70); 
                     ctx.fillStyle = "#000";
-                    ctx.fillText("お年玉", p.x + 18, 290);
-                }
+                    const text = "お年玉";
+                    for (let i = 0; i < text.length; i++) {
+                        ctx.fillText(text[i], p.x + 18, 270 + (i * 18));
+                    }
             });
             //5分間操作がないプレイヤーを30秒ごとにチェックして削除
             setInterval(() => {
