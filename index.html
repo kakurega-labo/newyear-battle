@@ -149,8 +149,11 @@
         const myPlayerId = Math.random().toString(36).substring(2, 10);
 
         function startHost() {
-            document.getElementById('setup').classList.add('hidden');
-            document.getElementById('host-view').classList.remove('hidden');
+            document.getElementById('player-view').remove(); 
+            document.getElementById('setup').remove();
+            const hostView = document.getElementById('host-view');
+            hostView.classList.remove('hidden');
+            
             const canvas = document.getElementById('game-canvas');
             const ctx = canvas.getContext('2d');
             playersRef.on('value', (snapshot) => {
@@ -167,8 +170,11 @@
         }
 
         function startPlayer() {
-            document.getElementById('setup').classList.add('hidden');
-            document.getElementById('player-view').classList.remove('hidden');
+            document.getElementById('host-view').remove();
+            document.getElementById('setup').remove();
+            const playerView = document.getElementById('player-view');
+            playerView.classList.remove('hidden');
+            
             let currentX = 375;
             playersRef.child(myPlayerId).set({ x: currentX });
             document.getElementById('left').onclick = () => {
