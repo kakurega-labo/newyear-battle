@@ -163,6 +163,7 @@
                 const players = snapshot.val();
                 for (let id in players) {
                     const p = players[id];
+                    if (!p) continue; // データが空（削除済み）ならスキップ
                     ctx.fillStyle = "#ffd700";
                     ctx.fillRect(p.x, 250, 50, 70); 
                     ctx.fillStyle = "#000";
@@ -179,6 +180,7 @@
             
             let currentX = 375;
             playersRef.child(myPlayerId).set({ x: currentX });
+            playersRef.child(myPlayerId).onDisconnect().remove();
             document.getElementById('left').onclick = () => {
                 currentX = Math.max(0, currentX - 20); // 0より小さくならない
                 playersRef.child(myPlayerId).update({ x: currentX });
