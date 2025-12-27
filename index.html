@@ -181,19 +181,13 @@
                 }
             });
 
-            // 追加：タイマー処理を関数化（プレイヤーが参加してから動かすため）
+            // タイマー処理を関数化（プレイヤーが参加してから動かすため）
             function startCountdown() {
                 const timerId = setInterval(() => {
                     if (timeLeft > 0) timeLeft--;
                     else clearInterval(timerId);
                 }, 1000);
             }
-
-            // 制限時間カウントダウン
-            const timerId = setInterval(() => {
-                if (timeLeft > 0) timeLeft--;
-                else clearInterval(timerId);
-            }, 1000);
             
             // メインゲームループ
             function updateGame() {
