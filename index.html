@@ -303,6 +303,8 @@
             scoreDisplay.innerText = "スコア: ¥0";
             playerView.prepend(scoreDisplay); // ボタンの上に挿入
             let currentX = 375;
+
+            let hasInitialized = false;
             
             // 色管理と初期登録ロジック
             const availableColors = ['#ff4b4b', '#4b77ff', '#4bff4b', '#ffff4b', '#ff4bff'];
@@ -341,8 +343,12 @@
             // 切断時は単にオフラインにするだけで、削除（null化）の検知は親機の削除ロジックに任せる
             playersRef.child(myPlayerId).onDisconnect().cancel();
             // 削除（ログアウト）を検知するリスナー
-            playersRef.child(myPlayerId).on('value', (snapshot) => {
-                if (snapshot.val() === null) {
+            playersRef.child(myPlayerId).on('value', (snapshot) => {
+                const data = snapshot.val();
+                if (data !== null) {
+                    hasInitialized = true; // 初回データ登録を確認
+                } else if (hasInitialized) {
+                    // 「登録済み」かつ「データが消えた」場合のみメッセージを出す
                     const msg = document.createElement('div');
                     msg.innerText = "ゲームが終了しました";
                     msg.style.cssText = "color: #ffd700; margin-top: 20px; font-weight: bold; font-size: 1.2rem;";
