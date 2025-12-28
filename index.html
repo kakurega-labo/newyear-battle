@@ -202,6 +202,9 @@
                         });
                     }
                 } else {
+                    // 初回のみ終了状態をDBに書き込み、全プレイヤーを削除
+                    db.ref('gameState').set({ status: 'finished' });
+                    playersRef.remove();
                     ctx.fillStyle = "red";
                     ctx.fillText("終了！！", canvas.width / 2, canvas.height / 2);
                 }
@@ -263,6 +266,14 @@
                     });
                 });
             }, 30000);
+            
+            // 親機のリセット監視
+            db.ref('gameState').on('value', (snapshot) => {
+                const data = snapshot.val();
+                if (data && data.status === 'idle') {
+                    location.reload(); // 状態がリセットされたらリロード
+                }
+            });
         }
 
         function startPlayer() {
@@ -318,7 +329,27 @@
                    lastActive: firebase.database.ServerValue.TIMESTAMP 
                 });
             };
+            // 子機の終了監視とリザルト表示
+            db.ref('gameState').on('value', (snapshot) => {
+                const data = snapshot.val();
+                if (data && data.status === 'finished') {
+                    const finalScore = document.getElementById('player-score-display').innerText;
+                    playerView.innerHTML = `
+                        <div style="background: #fffaf0; color: #333; padding: 20px; border-radius: 10px; border: 4px solid #ffd700; margin-top:20px;">
+                            <h2 style="color: #8b0000;">対戦終了！</h2>
+                            <p style="font-size: 1.5rem; font-weight: bold;">${finalScore}</p>
+                            <button onclick="resetGame()" class="modal-close-btn" style="width:100%">もう一度遊ぶ（全員リセット）</button>
+                        </div>
+                    `;
+                }
+            });
         }
+        // 全員をリロードさせるリセット処理
+        window.resetGame = function() {
+            db.ref('gameState').set({ status: 'idle' }).then(() => {
+                location.reload();
+            });
+        };
     </script>
 </body>
 </html>
