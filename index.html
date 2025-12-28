@@ -301,7 +301,7 @@
             playersRef.child(myPlayerId).on('value', (snapshot) => {
                 if (snapshot.val() === null) {
                     const msg = document.createElement('div');
-                    msg.innerText = "ログアウトしました";
+                    msg.innerText = "ゲームが終了しました";
                     msg.style.cssText = "color: #ffd700; margin-top: 20px; font-weight: bold; font-size: 1.2rem;";
                     playerView.appendChild(msg);
                     setTimeout(() => msg.remove(), 8000); // 8秒後に消去
