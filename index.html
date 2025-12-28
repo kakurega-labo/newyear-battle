@@ -234,7 +234,8 @@
                     if (!p) continue;
                     
                     const envelopeY = 500;
-                    ctx.fillStyle = "#ffd700";
+                    // プレイヤー情報(p)に含まれるcolorを使用。なければデフォルトの金色
+                    ctx.fillStyle = p.color || "#ffd700";
                     ctx.fillRect(p.x, envelopeY, 50, 70);
                     ctx.fillStyle = "#000";
                     ctx.font = "14px sans-serif";
@@ -303,11 +304,40 @@
             playerView.prepend(scoreDisplay); // ボタンの上に挿入
             let currentX = 375;
             
-            // 初期登録時にも時刻を保存
-            playersRef.child(myPlayerId).set({ 
-                x: currentX,
-                lastActive: firebase.database.ServerValue.TIMESTAMP 
-            });
+            // 色管理と初期登録ロジック
+            const availableColors = ['#ff4b4b', '#4b77ff', '#4bff4b', '#ffff4b', '#ff4bff'];
+
+            playersRef.once('value', (snapshot) => {
+                const players = snapshot.val() || {};
+                const usedColors = Object.values(players).map(p => p.color);
+                const myColor = availableColors.find(c => !usedColors.includes(c));
+
+                if (!myColor) {
+            // 空きがない場合
+                    const msg = document.createElement('div');
+                    msg.innerText = "選択できる色がありません（満員です）";
+                    msg.style.cssText = "color: #fff; background: rgba(0,0,0,0.7); padding: 10px; margin-top: 20px; font-weight: bold;";
+                    playerView.appendChild(msg);
+                    // コントローラーを無効化
+                    document.getElementById('left').disabled = true;
+                    document.getElementById('right').disabled = true;
+                    return;
+                }
+
+                // 初期登録
+                playersRef.child(myPlayerId).set({ 
+                    x: currentX,
+                    color: myColor,
+                    score: 0,
+                    lastActive: firebase.database.ServerValue.TIMESTAMP 
+                });
+
+                // 自分の色を画面に反映
+                scoreDisplay.style.backgroundColor = myColor;
+                scoreDisplay.style.color = "#000"; 
+                scoreDisplay.style.borderRadius = "5px";
+            });
+            
             // 切断時は単にオフラインにするだけで、削除（null化）の検知は親機の削除ロジックに任せる
             playersRef.child(myPlayerId).onDisconnect().cancel();
             // 削除（ログアウト）を検知するリスナー
