@@ -150,55 +150,55 @@
         const playersRef = db.ref('players'); // プレイヤー位置情報の参照先
         const myPlayerId = Math.random().toString(36).substring(2, 10);
 
-        function startHost() {
-            document.getElementById('player-view').remove(); 
-            document.getElementById('setup').remove();
-            const hostView = document.getElementById('host-view');
-            hostView.classList.remove('hidden');
-            
-            const canvas = document.getElementById('game-canvas');
-            const ctx = canvas.getContext('2d');
+function startHost() {
+            document.getElementById('player-view').remove(); 
+            document.getElementById('setup').remove();
+            const hostView = document.getElementById('host-view');
+            hostView.classList.remove('hidden');
+            
+            const canvas = document.getElementById('game-canvas');
+            const ctx = canvas.getContext('2d');
 
-            // ゲーム管理用変数
-            let timeLeft = 60;
-            let moneyItems = [];
-            let remotePlayers = {};
-            let gameStarted = false;
-            const moneyTypes = [
-                { label: "100", value: 100, color: "#c0c0c0", width: 40 },
-                { label: "500", value: 500, color: "#b8860b", width: 45 },
-                { label: "1000", value: 1000, color: "#add8e6", width: 60 },
-                { label: "5000", value: 5000, color: "#dda0dd", width: 65 },
-                { label: "1万", value: 10000, color: "#f5f5dc", width: 70 }
-            ];
+            // ゲーム管理用変数
+            let timeLeft = 60;
+            let moneyItems = [];
+            let remotePlayers = {};
+            let gameStarted = false; // 開始フラグ
+            const moneyTypes = [
+                { label: "100", value: 100, color: "#c0c0c0", width: 40 },
+                { label: "500", value: 500, color: "#b8860b", width: 45 },
+                { label: "1000", value: 1000, color: "#add8e6", width: 60 },
+                { label: "5000", value: 5000, color: "#dda0dd", width: 65 },
+                { label: "1万", value: 10000, color: "#f5f5dc", width: 70 }
+            ];
 
-            playersRef.on('value', (snapshot) => {
-                remotePlayers = snapshot.val() || {};
-                // まだ開始しておらず、かつプレイヤーが1人以上存在する場合に開始
+            playersRef.on('value', (snapshot) => {
+                remotePlayers = snapshot.val() || {};
+                // プレイヤーが1人以上になったら自動開始
                 if (!gameStarted && Object.keys(remotePlayers).length > 0) {
                     gameStarted = true;
                 }
-            });
+            });
 
-            // 制限時間カウントダウン
-            const timerId = setInterval(() => {
-                if (gameStarted) {
-                  if (timeLeft > 0) timeLeft--;
-                  else clearInterval(timerId);    
+            // 制限時間カウントダウン
+            const timerId = setInterval(() => {
+                if (gameStarted) {
+                    if (timeLeft > 0) timeLeft--;
+                    else clearInterval(timerId);
                 }
-            }, 1000);
+            }, 1000);
 
-            // メインゲームループ
-            function updateGame() {
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
+            // メインゲームループ
+            function updateGame() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-                // 1. 制限時間の表示
-                ctx.fillStyle = "#8b0000";
-                ctx.font = "bold 30px 'Sawarabi Mincho'";
-                ctx.textAlign = "center";
-                ctx.fillText(`残り時間: ${timeLeft}秒`, canvas.width / 2, 40);
+                // 1. 制限時間の表示
+                ctx.fillStyle = "#8b0000";
+                ctx.font = "bold 30px 'Sawarabi Mincho'";
+                ctx.textAlign = "center";
+                ctx.fillText(`残り時間: ${timeLeft}秒`, canvas.width / 2, 40);
 
-if (timeLeft > 0 && gameStarted) {
+                if (timeLeft > 0 && gameStarted) {
                     // 2. お年玉の生成
                     if (Math.random() < 0.05) {
                         const type = moneyTypes[Math.floor(Math.random() * moneyTypes.length)];
@@ -225,72 +225,66 @@ if (timeLeft > 0 && gameStarted) {
                     ctx.fillText("終了！！", canvas.width / 2, canvas.height / 2);
                 }
 
-                // 3. プレイヤー（封筒）の描画と衝突判定
-                for (let id in remotePlayers) {
-                    const p = remotePlayers[id];
-                    if (!p) continue;
-                    
-                    // 封筒の描画 (位置は固定 Y=500付近)
-                    const envelopeY = 500;
-                    ctx.fillStyle = "#ffd700";
-                    ctx.fillRect(p.x, envelopeY, 50, 70);
-                    ctx.fillStyle = "#000";
-                    ctx.font = "14px sans-serif";
-                    ctx.fillText("お年玉", p.x + 25, envelopeY + 30);
-                    // スコア表示
-                    ctx.fillText(`¥${p.score || 0}`, p.x + 25, envelopeY + 90);
+                // 3. プレイヤー（封筒）の描画と衝突判定
+                for (let id in remotePlayers) {
+                    const p = remotePlayers[id];
+                    if (!p) continue;
+                    
+                    const envelopeY = 500;
+                    ctx.fillStyle = "#ffd700";
+                    ctx.fillRect(p.x, envelopeY, 50, 70);
+                    ctx.fillStyle = "#000";
+                    ctx.font = "14px sans-serif";
+                    ctx.textAlign = "center";
+                    ctx.fillText("お年玉", p.x + 25, envelopeY + 30);
+                    ctx.fillText(`¥${p.score || 0}`, p.x + 25, envelopeY + 90);
 
-                    // お年玉との衝突判定
-                    moneyItems.forEach((item, index) => {
-                        if (item.y + 20 > envelopeY && item.y < envelopeY + 70 &&
-                            item.x + item.width > p.x && item.x < p.x + 50) {
-                            
-                            // スコア加算処理（Firebase更新）
-                            const currentScore = p.score || 0;
-                            playersRef.child(id).update({ score: currentScore + item.value });
-                            moneyItems.splice(index, 1); // 取ったお年玉を消す
-                        }
-                    });
-                }
+                    moneyItems.forEach((item, index) => {
+                        if (item.y + 20 > envelopeY && item.y < envelopeY + 70 &&
+                            item.x + item.width > p.x && item.x < p.x + 50) {
+                            const currentScore = p.score || 0;
+                            playersRef.child(id).update({ score: currentScore + item.value });
+                            moneyItems.splice(index, 1);
+                        }
+                    });
+                }
 
-                // 4. お年玉の移動と描画
-                moneyItems.forEach((item, index) => {
-                    item.y += 3; // 落下速度
-                    ctx.fillStyle = item.color;
-                    ctx.fillRect(item.x, item.y, item.width, 30);
-                    ctx.fillStyle = "#000";
-                    ctx.font = "12px sans-serif";
-                    ctx.fillText(item.label, item.x + (item.width/2), item.y + 20);
+                // 4. お年玉の移動と描画
+                moneyItems.forEach((item, index) => {
+                    item.y += 3;
+                    ctx.fillStyle = item.color;
+                    ctx.fillRect(item.x, item.y, item.width, 30);
+                    ctx.fillStyle = "#000";
+                    ctx.font = "12px sans-serif";
+                    ctx.fillText(item.label, item.x + (item.width/2), item.y + 20);
+                    if (item.y > canvas.height) moneyItems.splice(index, 1);
+                });
 
-                    if (item.y > canvas.height) moneyItems.splice(index, 1);
-                });
+                requestAnimationFrame(updateGame);
+            }
+            updateGame();
 
-                requestAnimationFrame(updateGame);
-            }
-            updateGame(); // ループ開始
-
-            // 5分間操作がないプレイヤーを30秒ごとにチェックして削除
-            setInterval(() => {
-                const now = Date.now();
-                const cutoff = now - (5 * 60 * 1000); 
-                playersRef.once('value', (snapshot) => {
-                    snapshot.forEach((childSnapshot) => {
-                        const player = childSnapshot.val();
-                        if (player.lastActive && player.lastActive < cutoff) {
-                            playersRef.child(childSnapshot.key).remove();
-                        }
-                    });
-                });
-            }, 30000);
+            // タイムアウト監視とリセット監視（既存コード維持）
+            setInterval(() => {
+                const now = Date.now();
+                const cutoff = now - (5 * 60 * 1000); 
+                playersRef.once('value', (snapshot) => {
+                    snapshot.forEach((childSnapshot) => {
+                        const player = childSnapshot.val();
+                        if (player.lastActive && player.lastActive < cutoff) {
+                            playersRef.child(childSnapshot.key).remove();
+                        }
+                    });
+                });
+            }, 30000);
             
-            // 親機のリセット監視
             db.ref('gameState').on('value', (snapshot) => {
                 const data = snapshot.val();
                 if (data && data.status === 'idle') {
-                    location.reload(); // 状態がリセットされたらリロード
+                    location.reload();
                 }
             });
-        }
+        }
 
         function startPlayer() {
             document.getElementById('host-view').remove();
