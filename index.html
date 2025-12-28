@@ -151,6 +151,7 @@
         const myPlayerId = Math.random().toString(36).substring(2, 10);
 
         function startHost() {
+            db.ref('gameState').set({ status: 'playing' });
             document.getElementById('player-view').remove(); 
             document.getElementById('setup').remove();
             const hostView = document.getElementById('host-view');
@@ -342,7 +343,8 @@
             // 子機の終了監視とリザルト表示
             db.ref('gameState').on('value', (snapshot) => {
                 const data = snapshot.val();
-                if (data && data.status === 'finished') {
+                // ステータスが'finished'かつ、実際にゲームが動いている時のみリザルトを表示
+                if (data && data.status === 'finished' && playerView.offsetParent !== null) {
                     const finalScore = document.getElementById('player-score-display').innerText;
                     playerView.innerHTML = `
                         <div style="background: #fffaf0; color: #333; padding: 20px; border-radius: 10px; border: 4px solid #ffd700; margin-top:20px;">
