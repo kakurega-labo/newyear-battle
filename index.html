@@ -218,7 +218,7 @@
                     ctx.textAlign = "center";
                     ctx.fillText("子機の参加を待っています...", canvas.width / 2, canvas.height / 2 - 20);
                     ctx.font = "18px 'Sawarabi Mincho'";
-                    ctx.fillText("スマホで「子機として参加」を押してください", canvas.width / 2, canvas.height / 2 + 20);
+                    ctx.fillText("別端末で「子機として参加」を押してください", canvas.width / 2, canvas.height / 2 + 20);
                 } else if (timeLeft <= 0) {
                     // 終了処理
                     db.ref('gameState').set({ status: 'finished' });
