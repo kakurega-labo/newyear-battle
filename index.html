@@ -319,13 +319,25 @@
                 }
 
                 // 2. 参加コードの入力（一致するまで繰り返す）
-                let inputCode = prompt("親機に表示されている4桁のコードを入力してください:");
+                let inputCode = "";
+                while (true) {
+                    inputCode = prompt("親機に表示されている参加コードを入力してください:");
+                    
+                    if (inputCode === null) return; // キャンセルボタンが押されたら中断
 
-                while (inputCode !== state.joinCode) {
-                    if (inputCode === null) return; // キャンセルボタンが押されたら中断
-                    alert("コードが一致しません。もう一度入力してください。");
-                    inputCode = prompt("親機に表示されている4桁のコードを入力してください:");
-                }
+                    // 数字4桁かどうかのチェック
+                    if (!/^\d{4}$/.test(inputCode)) {
+                        alert("エラー：参加コードを4桁で入力してください。");
+                        continue;
+                    }
+
+                    // 正解チェック
+                    if (inputCode === state.joinCode) {
+                        break; 
+                    } else {
+                        alert("コードが一致しません。もう一度入力してください。");
+                    }
+                }
                 
                 // 3. 正解なら参加処理を進める
                 document.getElementById('host-view').remove();
