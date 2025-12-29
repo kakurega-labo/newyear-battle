@@ -234,7 +234,7 @@
                     ctx.fillText(`参加コード: ${joinCode}`, canvas.width / 2, canvas.height / 2 - 80);
                     ctx.font = "18px 'Sawarabi Mincho'";
                     ctx.fillStyle = "#8b0000";
-                    ctx.fillText("スマホでコードを入力して参加してください", canvas.width / 2, canvas.height / 2 + 60);
+                    ctx.fillText("子機で参加コードを入力してください。", canvas.width / 2, canvas.height / 2 + 60);
                 } else if (timeLeft <= 0) {
                     // 終了処理
                     db.ref('gameState').set({ status: 'finished' });
