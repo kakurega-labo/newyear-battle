@@ -314,7 +314,6 @@
                 // 親機が起動していない、または待機中でない場合
                 if (!state || state.status !== 'waiting') {
                     alert("親機が待機状態ではありません。親機を先に起動してください。");
-                    location.reload();
                     return;
                 }
 
