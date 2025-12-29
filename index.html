@@ -162,7 +162,9 @@
         const myPlayerId = Math.random().toString(36).substring(2, 10);
 
         function startHost() {
-            db.ref('gameState').set({ status: 'playing' });
+            // 4桁の参加コードを生成して待機状態(waiting)にする
+            const joinCode = Math.floor(1000 + Math.random() * 9000).toString();
+            db.ref('gameState').set({ status: 'waiting', joinCode: joinCode });
             document.getElementById('player-view').remove(); 
             document.getElementById('setup').remove();
             const hostView = document.getElementById('host-view');
@@ -226,8 +228,13 @@
                     ctx.font = "bold 24px 'Sawarabi Mincho'";
                     ctx.textAlign = "center";
                     ctx.fillText("子機の参加を待っています...", canvas.width / 2, canvas.height / 2 - 20);
+                    //参加コードの表示
+                    ctx.font = "bold 40px sans-serif";
+                    ctx.fillStyle = "#b8860b";
+                    ctx.fillText(`参加コード: ${joinCode}`, canvas.width / 2, canvas.height / 2);
                     ctx.font = "18px 'Sawarabi Mincho'";
-                    ctx.fillText("別端末で「子機として参加」を押してください", canvas.width / 2, canvas.height / 2 + 20);
+                    ctx.fillStyle = "#8b0000";
+                    ctx.fillText("スマホでコードを入力して参加してください", canvas.width / 2, canvas.height / 2 + 60);
                 } else if (timeLeft <= 0) {
                     // 終了処理
                     db.ref('gameState').set({ status: 'finished' });
@@ -300,10 +307,28 @@
         }
 
         function startPlayer() {
-            document.getElementById('host-view').remove();
-            document.getElementById('setup').remove();
-            const playerView = document.getElementById('player-view');
-            playerView.classList.remove('hidden');
+            // 1. 親機の状態とコードを確認
+            db.ref('gameState').once('value', (snapshot) => {
+                const state = snapshot.val();
+
+                // 親機が起動していない、または待機中でない場合
+                if (!state || state.status !== 'waiting') {
+                    alert("親機が待機状態ではありません。親機を先に起動してください。");
+                    return;
+                }
+
+                // 2. 参加コードの入力
+                const inputCode = prompt("親機に表示されている4桁のコードを入力してください:");
+                if (inputCode !== state.joinCode) {
+                    alert("コードが一致しません。");
+                    return;
+                }
+
+                // 3. 正解なら参加処理を進める（既存の処理）
+                document.getElementById('host-view').remove();
+                document.getElementById('setup').remove();
+                const playerView = document.getElementById('player-view');
+                playerView.classList.remove('hidden');
             
             // スコア表示用の要素を作成
             const scoreDisplay = document.createElement('div');
