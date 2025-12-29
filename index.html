@@ -314,16 +314,18 @@
                 // 親機が起動していない、または待機中でない場合
                 if (!state || state.status !== 'waiting') {
                     alert("親機が待機状態ではありません。親機を先に起動してください。");
+                    location.reload();
                     return;
                 }
 
                 // 2. 参加コードの入力
                 const inputCode = prompt("親機に表示されている4桁のコードを入力してください:");
+                // コード判定。不一致なら即終了・リロード
                 if (inputCode !== state.joinCode) {
                     alert("コードが一致しません。");
+                    location.reload();
                     return;
                 }
-            });
 
                 // 3. 正解なら参加処理を進める
                 document.getElementById('host-view').remove();
@@ -428,6 +430,7 @@
                     `;
                 }
             });
+          });
         }
         // 全員をリロードさせるリセット処理
         window.resetGame = function() {
