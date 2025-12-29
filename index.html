@@ -49,6 +49,15 @@
         button:active { 
           transform: translateY(2px); 
           box-shadow: 0 2px 0 #5f4b0b;
+        
+        
+        button:disabled {
+            background: #ccc;
+            border-color: #999;
+            color: #666;
+            box-shadow: none;
+            cursor: not-allowed;
+            transform: none !important;
         }
 
         /* コントローラーの改善 */
