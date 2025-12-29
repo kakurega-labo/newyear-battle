@@ -183,7 +183,7 @@
                 { label: "500", value: 500, color: "#b8860b", width: 45 },
                 { label: "1000", value: 1000, color: "#add8e6", width: 60 },
                 { label: "5000", value: 5000, color: "#dda0dd", width: 65 },
-                { label: "1万", value: 10000, color: "#f5f5dc", width: 70 }
+                { label: "10000", value: 10000, color: "#f5f5dc", width: 70 }
             ];
 
             playersRef.on('value', (snapshot) => {
@@ -318,15 +318,15 @@
                     return;
                 }
 
-                // 2. 参加コードの入力
-                const inputCode = prompt("親機に表示されている4桁のコードを入力してください:");
-                // コード判定。不一致なら即終了・リロード
-                if (inputCode !== state.joinCode) {
-                    alert("コードが一致しません。");
-                    location.reload();
-                    return;
-                }
+                // 2. 参加コードの入力（一致するまで繰り返す）
+                let inputCode = prompt("親機に表示されている4桁のコードを入力してください:");
 
+                while (inputCode !== state.joinCode) {
+                    if (inputCode === null) return; // キャンセルボタンが押されたら中断
+                    alert("コードが一致しません。もう一度入力してください。");
+                    inputCode = prompt("親機に表示されている4桁のコードを入力してください:");
+                }
+                
                 // 3. 正解なら参加処理を進める
                 document.getElementById('host-view').remove();
                 document.getElementById('setup').remove();
