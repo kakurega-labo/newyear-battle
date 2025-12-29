@@ -323,8 +323,9 @@
                     alert("コードが一致しません。");
                     return;
                 }
+            });
 
-                // 3. 正解なら参加処理を進める（既存の処理）
+                // 3. 正解なら参加処理を進める
                 document.getElementById('host-view').remove();
                 document.getElementById('setup').remove();
                 const playerView = document.getElementById('player-view');
