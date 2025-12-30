@@ -217,6 +217,8 @@
             playersRef.on('value', (snapshot) => {
                 const data = snapshot.val() || {};
                 remotePlayers = data;
+                // 現在の接続人数
+                console.log("現在の接続人数: " + Object.keys(data).length + "人");
                 // プレイヤーが1人以上になったら自動開始
                 if (Object.keys(data).length > 0) {
                     gameStarted = true;
@@ -318,7 +320,7 @@
             }
             updateGame();
 
-            // タイムアウト監視とリセット監視（既存コード維持）
+            // タイムアウト監視とリセット監視
             setInterval(() => {
                 const now = Date.now();
                 const cutoff = now - (5 * 60 * 1000); 
@@ -334,6 +336,7 @@
             
             db.ref('gameState').on('value', (snapshot) => {
                 const data = snapshot.val();
+                if (data && data.status === 'playing') gameStarted = true;
                 if (data && data.status === 'idle') {
                     location.reload();
                 }
