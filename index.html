@@ -21,10 +21,6 @@
             -webkit-user-select: none;
         }
         
-        .hidden { 
-          display: none;
-        }
-        
         h1 {
           font-size: clamp(1.5rem, 8vw, 2.5rem) !important;
           padding: 0 10px;
@@ -141,16 +137,6 @@
         <button onclick="showInstructions()" style="background: #fff; color: #8b0000; border: 2px solid #8b0000;">遊び方を見る</button>
     </div>
 
-    <div id="host-view" class="hidden">
-        <div id="qrcode"></div> 
-        <canvas id="game-canvas" width="800" height="600"></canvas>
-    </div>
-
-    <div id="player-view" class="hidden" style="width: 100%; text-align: center;">
-        <button class="controller-btn" id="left">左へ</button>
-        <button class="controller-btn" id="right">右へ</button>
-    </div>
-
     <script>
         // --- 遊び方ポップアップをDOMに動的生成する関数 ---
         function showInstructions() {
@@ -193,9 +179,19 @@
         const myPlayerId = Math.random().toString(36).substring(2, 10);
 
         function startHost() {
+            const hostView = document.createElement('div');
+            hostView.id = 'host-view';
+            hostView.innerHTML = ` 
+                <canvas id="game-canvas" width="800" height="600"></canvas>
+            `;
+            document.body.appendChild(hostView);
+
             // 4桁の参加コードを生成して待機状態(waiting)にする
             const joinCode = Math.floor(1000 + Math.random() * 9000).toString();
             db.ref('gameState').set({ status: 'waiting', joinCode: joinCode });
+
+            if(document.getElementById('setup')) document.getElementById('setup').remove();
+            
             document.getElementById('player-view').remove(); 
             document.getElementById('setup').remove();
             const hostView = document.getElementById('host-view');
@@ -376,10 +372,17 @@
                 }
                 
                 // 3. 正解なら参加処理を進める
-                document.getElementById('host-view').remove();
                 document.getElementById('setup').remove();
+                const playerView = document.createElement('div');
+                playerView.id = 'player-view';
+                playerView.style.cssText = "width: 100%; text-align: center;";
+                playerView.innerHTML = `
+                    <button class="controller-btn" id="left">左へ</button>
+                    <button class="controller-btn" id="right">右へ</button>
+                `;
+                document.body.appendChild(playerView);
+                
                 const playerView = document.getElementById('player-view');
-                playerView.classList.remove('hidden');
             
             // スコア表示用の要素を作成
             const scoreDisplay = document.createElement('div');
