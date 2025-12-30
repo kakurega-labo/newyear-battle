@@ -20,9 +20,16 @@
             user-select: none;
             -webkit-user-select: none;
         }
+        
         .hidden { 
           display: none;
         }
+        
+        h1 {
+          font-size: clamp(1.5rem, 8vw, 2.5rem) !important;
+          padding: 0 10px;
+        }
+        
         #game-canvas { 
           border: 5px solid #ffd700; 
           background: #fffaf0; 
@@ -46,6 +53,7 @@
             user-select: none;
             -webkit-user-select:none;
         }
+        
         button:active { 
           transform: translateY(2px); 
           box-shadow: 0 2px 0 #5f4b0b;
@@ -60,11 +68,28 @@
             transform: none !important;
         }
 
+        #player-view {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
         /* コントローラーの改善 */
         .controller-btn { 
-          width: 45%; 
-          height: 150px; 
-          font-size: 1.5rem;
+          flex: 1; 
+          min-width: 140px;
+          height: clamp(80px, 20vh, 150px);
+          font-size: clamp(1.2rem, 5vw, 1.8rem);
+          margin: 5px !important;
+        }
+
+        @media (min-width: 768px) {
+            .controller-btn {
+                max-width: 250px;
+            }
         }
         
         /* ポップアップ（モーダル）のスタイル */
@@ -80,6 +105,7 @@
             align-items: center;
             z-index: 1000;
         }
+        
         .modal-content {
             background: #fffaf0; 
             color: #333; 
@@ -89,6 +115,7 @@
             border: 4px solid #ffd700; 
             position: relative;
         }
+        
         .modal-close-btn { 
           background: #8b0000; 
           color: white; 
@@ -97,6 +124,7 @@
           width: 100%; 
           margin-top: 15px;
         }
+        
     </style>
 </head>
 <body>
