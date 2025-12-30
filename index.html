@@ -218,7 +218,7 @@
                 const data = snapshot.val() || {};
                 remotePlayers = data;
                 // プレイヤーが1人以上になったら自動開始
-                if (!gameStarted && Object.keys(data).length > 0) {
+                if (Object.keys(data).length > 0) {
                     gameStarted = true;
                 }
             });
@@ -251,7 +251,7 @@
                             ...type
                         });
                     }
-                } else if (!gameStarted) {
+                } else if (!gameStarted && remotePlayers && Object.keys(remotePlayers).length === 0) {
                     // 待機画面の描画
                     ctx.fillStyle = "#8b0000";
                     ctx.font = "bold 24px 'Sawarabi Mincho'";
@@ -423,6 +423,9 @@
                     score: 0,
                     lastActive: firebase.database.ServerValue.TIMESTAMP 
                 });
+
+                // 子機が参加した瞬間に、親機のステータスを「playing」に更新する
+                db.ref('gameState').update({ status: 'playing' });
 
                 // 自分の色を画面に反映
                 scoreDisplay.style.backgroundColor = myColor;
