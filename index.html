@@ -270,6 +270,11 @@
                     ctx.fillStyle = "red";
                     ctx.font = "bold 40px 'Sawarabi Mincho'";
                     ctx.fillText("終了！！", canvas.width / 2, canvas.height / 2);
+                    
+                    if(!window.isReloading) {
+                        window.isReloading = true;
+                        setTimeout(() => { location.reload(); }, 5000);
+                    }
                 }
 
                 // 3. プレイヤー（封筒）の描画と衝突判定
