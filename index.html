@@ -194,8 +194,7 @@
             
             document.getElementById('player-view').remove(); 
             document.getElementById('setup').remove();
-            const hostView = document.getElementById('host-view');
-            hostView.classList.remove('hidden');
+            hostView = document.getElementById('host-view');
             
             const canvas = document.getElementById('game-canvas');
             const ctx = canvas.getContext('2d');
@@ -382,7 +381,7 @@
                 `;
                 document.body.appendChild(playerView);
                 
-                const playerView = document.getElementById('player-view');
+                playerView = document.getElementById('player-view');
             
             // スコア表示用の要素を作成
             const scoreDisplay = document.createElement('div');
