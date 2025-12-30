@@ -190,11 +190,13 @@
             const joinCode = Math.floor(1000 + Math.random() * 9000).toString();
             db.ref('gameState').set({ status: 'waiting', joinCode: joinCode });
 
-            if(document.getElementById('setup')) document.getElementById('setup').remove();
-            
-            document.getElementById('player-view').remove(); 
-            document.getElementById('setup').remove();
-            hostView = document.getElementById('host-view');
+            // setup要素が存在する場合のみ削除する
+            const setupView = document.getElementById('setup');
+            if (setupView) setupView.remove();
+
+            // player-viewは子機用なので親機開始時は存在チェックをしてから削除
+            const playerViewCheck = document.getElementById('player-view');
+            if (playerViewCheck) playerViewCheck.remove();
             
             const canvas = document.getElementById('game-canvas');
             const ctx = canvas.getContext('2d');
