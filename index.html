@@ -215,9 +215,10 @@
             ];
 
             playersRef.on('value', (snapshot) => {
-                remotePlayers = snapshot.val() || {};
+                const data = snapshot.val() || {};
+                remotePlayers = data;
                 // プレイヤーが1人以上になったら自動開始
-                if (!gameStarted && Object.keys(remotePlayers).length > 0) {
+                if (!gameStarted && Object.keys(data).length > 0) {
                     gameStarted = true;
                 }
             });
