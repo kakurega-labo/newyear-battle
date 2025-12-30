@@ -29,6 +29,13 @@
           font-size: clamp(1.5rem, 8vw, 2.5rem) !important;
           padding: 0 10px;
         }
+
+        ul {
+          text-align: left;
+          line-height: 1.6;
+          list-style: none;
+          padding-left: 0px;
+        }
         
         #game-canvas { 
           border: 5px solid #ffd700; 
@@ -106,6 +113,11 @@
             border: 4px solid #ffd700; 
             position: relative;
         }
+
+        .modal-content h2{
+            color: #8b0000; 
+            border-bottom: 2px solid #ffd700;
+        }
         
         .modal-close-btn { 
           background: #8b0000; 
@@ -150,7 +162,7 @@
             content.className = 'modal-content';
             content.innerHTML = `
                 <h2 style="color: #8b0000; border-bottom: 2px solid #ffd700;">遊び方説明</h2>
-                <ul style="text-align: left; line-height: 1.6;">
+                <ul>
                     <li><strong>PC(親機):</strong> ゲーム画面を表示します。</li>
                     <li><strong>スマホ(子機):</strong> コントローラーとして参加します。</li>
                     <li>左右のボタンを押して、ポチ袋を動かそう！</li>
